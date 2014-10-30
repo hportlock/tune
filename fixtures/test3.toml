@@ -1,0 +1,1 @@
+databaseURL = "{{(.Getenv "FOO")}}"
