@@ -3,6 +3,12 @@
 Tune is a simple golang library that helps with loading TOML configuration
 files.
 
+Installation:
+
+```bash
+go get github.com/hportlock/tune
+```
+
 ## Loading configuration
 
 Assuming that you have a directory called `config` that contains the following
