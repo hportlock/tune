@@ -56,5 +56,14 @@ func TestLoadConfig(t *testing.T) {
 			}
 			So(config.DatabaseURL, ShouldEqual, "snat")
 		})
+
+		Convey("Parses the general settings.toml file", func() {
+			config := testConfig{}
+			err := LoadConfig(configRoot, "emptyenv", &config)
+			if err != nil {
+				t.Fatal(err)
+			}
+			So(config.DatabaseURL, ShouldEqual, "settingsfoo")
+		})
 	})
 }

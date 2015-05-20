@@ -28,25 +28,52 @@ func (e envVarLoader) Getenv(key string) string {
 //	config: The struct to write the config values to. It's structure should
 //		match the config file.
 func LoadConfig(configDir string, env string, config interface{}) error {
-	configFile := fmt.Sprintf("%s.toml", strings.ToLower(env))
+	settingsFile := "settings.toml"
+	envFile := fmt.Sprintf("%s.toml", strings.ToLower(env))
 	localFile := fmt.Sprintf("%s.local.toml", strings.ToLower(env))
 
+	err := readSettings(configDir, settingsFile, config)
+	if err != nil {
+		return fmt.Errorf("Error reading config file: %s", err)
+	}
+
+	err = readSettings(configDir, envFile, config)
+	if err != nil {
+		return fmt.Errorf("Error reading config file: %s", err)
+	}
+
+	err = readSettings(configDir, localFile, config)
+	if err != nil {
+		return fmt.Errorf("Error reading config file: %s", err)
+	}
+
+	return nil
+}
+
+func readSettings(configDir string, configFile string, config interface{}) error {
 	configBytes, err := ioutil.ReadFile(path.Join(configDir, configFile))
-	if err != nil {
-		return (fmt.Errorf("Error reading config file: %s", err))
+	if os.IsNotExist(err) {
+		return nil
 	}
 
-	err = parseConfig(configBytes, config)
 	if err != nil {
-		return fmt.Errorf("Error loading config %s: %s", configFile, err)
+		return err
 	}
 
-	localConfigBytes, err := ioutil.ReadFile(path.Join(configDir, localFile))
-	if err == nil {
-		err = parseConfig(localConfigBytes, config)
-		if err != nil {
-			return fmt.Errorf("Error loading config %s: %s", localFile, err)
-		}
+	configTemplate, err := template.New("config").Parse(string(configBytes))
+	if err != nil {
+		return fmt.Errorf("Can't parse template: %s", err)
+	}
+
+	configContent := new(bytes.Buffer)
+	configTemplate.Execute(configContent, envVarLoader{})
+	if err != nil {
+		return fmt.Errorf("Can't process template: %s", err)
+	}
+
+	_, err = toml.DecodeReader(configContent, config)
+	if err != nil {
+		return fmt.Errorf("Can't parse toml: %s", err)
 	}
 
 	return nil

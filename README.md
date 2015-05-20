@@ -70,6 +70,11 @@ DatabaseServer = "localhost"
 Then after calling LoadConfig your Config struct will contain a DatabaseServer of
 "localhost" and a DatabaseName of "development".
 
+## Shared settings between environments
+
+To have some settings that are shared across environments simply add them
+to a settings.toml file in the root of you config directory.
+
 ## Environment Variables
 
 You can also use environment variables in your TOML templates. Just use the
